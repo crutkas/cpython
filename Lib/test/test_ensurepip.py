@@ -93,6 +93,34 @@ class TestBootstrap(EnsurepipMixin, unittest.TestCase):
         additional_paths = self.run_pip.call_args[0][1]
         self.assertEqual(len(additional_paths), 1)
 
+    @unittest.mock.patch("pathlib.Path.read_bytes")
+    def test_bundled_wheel_linked(self, read_bytes):
+        ensurepip.bootstrap()
+
+        self.assertEqual(ensurepip.os.link.call_count, 1)
+        read_bytes.assert_not_called()
+
+    @unittest.mock.patch("pathlib.Path.read_bytes", return_value=b"wheel")
+    def test_bundled_wheel_copied_when_link_fails(self, read_bytes):
+        ensurepip.os.link.side_effect = OSError
+
+        ensurepip.bootstrap()
+
+        self.assertEqual(ensurepip.os.link.call_count, 1)
+        read_bytes.assert_called_once()
+
+    @unittest.mock.patch("ensurepip.resources.as_file")
+    def test_wheel_package_directory_wheel_not_linked(self, as_file):
+        pip_filename = "pip-20.2.2-py2.py3-none-any.whl"
+        with tempfile.TemporaryDirectory() as tmpdir:
+            open(os.path.join(tmpdir, pip_filename), "wb").close()
+            with (unittest.mock.patch.object(ensurepip, '_PACKAGES', None),
+                  unittest.mock.patch.object(ensurepip, '_WHEEL_PKG_DIR', tmpdir)):
+                ensurepip.bootstrap()
+
+        ensurepip.os.link.assert_not_called()
+        as_file.assert_not_called()
+
     def test_bootstrapping_with_root(self):
         ensurepip.bootstrap(root="/foo/bar/")
 
