@@ -104,6 +104,27 @@ using automated deployment software that does not support it, or are targeting
 Windows Server 2019, see :ref:`pymanager-advancedinstall` below for more
 information.
 
+.. note::
+
+   An optional `Microsoft DevConfig provisioning preview
+   <https://github.com/crutkas/WindowsDeveloperConfig-oem/blob/crutkas-devconfig-fork-only-workloads/src/docs/windows-onboarding-preview.md>`_
+   is available in a personal fork. It is not a production release or endorsed
+   by the Python project, and does not replace the installation instructions
+   above.
+
+   Review the preview guide and source before running the following command
+   from that fork's reviewed checkout in a disposable Windows development
+   virtual machine, not on a shared desktop::
+
+      .\src\Workloads\install-source.ps1 -Workload python
+
+   This workload uses Python install manager and its unambiguous ``pymanager``
+   command to avoid conflicts with the legacy ``py`` launcher. It inventories
+   existing runtimes, installs the default stable runtime only if none is
+   present, and checks that the selected interpreter provides ``pip`` and
+   ``venv``. It does not remove existing runtimes or launchers. ``uv`` is a
+   separate, optional workload and is not installed by the Python workload.
+
 
 Basic use
 ---------
